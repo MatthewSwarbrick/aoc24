@@ -1,13 +1,20 @@
 import kotlin.math.abs
 
 fun main() {
-    val answer = input
+    val part1Answer = input
         .toOrderedListsAsc()
         .toPairs()
         .toDifferences()
         .sum()
 
-    println("Answer: $answer")
+    println("Part 1 Answer: $part1Answer")
+
+    val part2Answer = input
+        .toOrderedListsAsc()
+        .toSimilarityScores()
+        .sum()
+
+    println("Part 2 Answer: $part2Answer")
 }
 
 private fun List<String>.toOrderedListsAsc(): List<List<Int>> =
@@ -31,3 +38,10 @@ private fun List<Pair<Int, Int>>.toDifferences() =
     this.map { (left, right) ->
         abs(left - right)
     }
+
+private fun List<List<Int>>.toSimilarityScores(): List<Int> {
+    val (left, right) = this
+    return left.map { score ->
+        score * right.count { it == score}
+    }
+}
