@@ -1,7 +1,7 @@
 import kotlin.math.pow
 
 data class Equation(val testValue: Double, val numbers: List<Double>)
-enum class Operator { ADD, MULTIPLY }
+enum class Operator { ADD, MULTIPLY, CONCATENATION }
 
 fun main() {
     val part1 = input
@@ -10,6 +10,13 @@ fun main() {
         .sumOf { it.testValue }
 
     println("Part 1: ${part1.toLong()}")
+
+    val part2 = input
+        .toEquations()
+        .toSolvableEquations(withConcatenation = true)
+        .sumOf { it.testValue }
+
+    println("Part 2: ${part2.toLong()}")
 }
 
 private fun List<String>.toEquations(): List<Equation> =
@@ -20,25 +27,26 @@ private fun List<String>.toEquations(): List<Equation> =
         Equation(testValue, numbers)
     }
 
-private fun List<Equation>.toSolvableEquations(): List<Equation> =
+private fun List<Equation>.toSolvableEquations(withConcatenation: Boolean = false): List<Equation> =
     this.filter { equation ->
-        val possibleOperatorVariations = equation.toPossibleOperatorVariations()
+        val possibleOperatorVariations = equation.toPossibleOperatorVariations(withConcatenation)
         possibleOperatorVariations.any {
             val value = it.evaluate(equation.numbers)
             equation.testValue == value
         }
     }
 
-private fun Equation.toPossibleOperatorVariations(): List<List<Operator>> {
+private fun Equation.toPossibleOperatorVariations(withConcatenation: Boolean): List<List<Operator>> {
     val numberOfOperators = this.numbers.size - 1
-    val bitSize = 2.0.pow(numberOfOperators.toDouble()).toInt() - 1
+    val power = if(withConcatenation) { 3.0 } else { 2.0 }
+    val bitSize = power.pow(numberOfOperators.toDouble()).toInt() - 1
     return (0..bitSize)
-        .map { it.toString(2).padStart(numberOfOperators, '0') }
+        .map { it.toString(power.toInt()).padStart(numberOfOperators, '0') }
         .map { operators -> operators.map {
             when(it) {
                 '0' -> Operator.ADD
                 '1' -> Operator.MULTIPLY
-                else -> Operator.ADD
+                else -> Operator.CONCATENATION
             }
         } }
 }
@@ -53,5 +61,6 @@ private fun List<Operator>.evaluate(numbers: List<Double>): Double =
         when(operatorToApply) {
             Operator.ADD -> aggregate + value
             Operator.MULTIPLY -> aggregate * value
+            Operator.CONCATENATION -> "${aggregate.toLong()}${value.toLong()}".toDouble()
         }
     }
