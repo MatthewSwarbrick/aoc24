@@ -13,6 +13,14 @@ fun main() {
         .count()
 
     println("Part 1: $part1")
+
+    val part2 = grid
+        .toAntennaCoords()
+        .toTAntiNodes(grid.maxOf { it.key.x }, grid.maxOf { it.key.y })
+        .toAntiNodesPresentOnGrid(grid)
+        .count()
+
+    println("Part 2: $part2")
 }
 
 private fun List<String>.toGrid(): Map<Coord, Frequency?> =
@@ -53,6 +61,30 @@ private fun Map<Frequency, List<Coord>>.toAntiNodes(): Set<Coord> =
                 }
             }.flatten()
         }.flatten()
+        .toSet()
+
+private fun Map<Frequency, List<Coord>>.toTAntiNodes(maxX: Int, maxY: Int): Set<Coord> =
+    this.map { (_, coords) ->
+        coords.map { sourceFrequencyCoord ->
+            coords
+                .map { pairedFrequencyCoord ->
+                    val originalDx = pairedFrequencyCoord.x - sourceFrequencyCoord.x
+                    val originalDy = pairedFrequencyCoord.y - sourceFrequencyCoord.y
+
+                    val antiNodeCoords = mutableListOf<Coord>()
+                    var dx = originalDx
+                    var dy = originalDy
+                    var iterations = 0
+                    while(iterations < maxX * maxY) {
+                        antiNodeCoords.add(Coord(pairedFrequencyCoord.x + dx, pairedFrequencyCoord.y + dy))
+                        dx += originalDx
+                        dy += originalDy
+                        iterations ++
+                    }
+                    antiNodeCoords
+                }.flatten()
+        }.flatten()
+    }.flatten()
         .toSet()
 
 private fun Set<Coord>.toAntiNodesPresentOnGrid(grid: Map<Coord, Frequency?>): Set<Coord> =
