@@ -12,6 +12,14 @@ fun main() {
         .values.sum()
 
     println("Part 1: $part1")
+
+    val part2 = input
+        .toTopology()
+        .toTrailheadPaths()
+        .toTrailheadRating()
+        .values.sum()
+
+    println("Part 2: $part2")
 }
 
 private fun List<String>.toTopology(): Map<Coord, TopologyItem> =
@@ -61,4 +69,10 @@ private fun List<TrailPath>.toTrailheadScore(): Map<Trailhead, Int> =
     this.groupBy { it.path.first() as Trailhead }
         .mapValues { (_, paths) ->
             paths.distinctBy { it.path.last() }.count()
+        }
+
+private fun List<TrailPath>.toTrailheadRating(): Map<Trailhead, Int> =
+    this.groupBy { it.path.first() as Trailhead }
+        .mapValues { (_, paths) ->
+            paths.count()
         }
